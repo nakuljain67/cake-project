@@ -1,0 +1,143 @@
+Database Table
+===============================     
+
+Database configuration file,
+config/app.php
+=============================================
+
+Used Namespace in Conctroller
+=============================================
+use Cake\ORM\TableRegistry;
+use Cake\Datasource\ConnectionManager;
+  
+ $users = TableRegistry::get('school');
+        $query = $users->find();
+        foreach ($query as $row):
+            echo "<tr><td>" . $row->id . "</td>";
+            echo "<td>" . $row->name . "</td></tr>";
+        endforeach;
+
+
+Query with Where Condition
+=============================================
+$results = $users->find()
+                ->where(['tbl_users.id' => 2]);
+
+With Multiple Conditions
+=============================================
+ $conditions = array(
+            'AND' => array(
+                array("id" => 1),
+                array("username" => "sanjay_rudra")
+        ));
+        
+        $results = $users->find()
+                ->where($conditions);
+
+Count Result
+==================================
+// In a controller or table method.
+$query = $articles->find('all', [
+    'conditions' => ['Articles.title LIKE' => '%Ovens%']
+]);
+$number = $query->count();
+
+/*database operations documentation*/
+
+https://book.cakephp.org/3.0/en/orm/retrieving-data-and-resultsets.html
+
+Flow of Files Processing: 
+
+Templates -> Component -> Controller
+
+In this Project, the things attached are:
+1. Making Custom Component,
+2. Attaching file to Component, from /vendor/ folder
+3. Making Email template layouts.
+
+// SOME USEFUL METHODS
+
+    public function saveuser() {
+        $this->autoRender = false;
+        $hashPswdObj = new DefaultPasswordHasher;
+
+        //$password = $hashPswdObj->hash("admin");
+        $users_table = TableRegistry::get('tbl_users');
+        $users = $users_table->newEntity();
+        $users->username = "meenu_rudra";
+        $users->pwd = md5("admin2");
+        $users->name = "Meenu Sharma";
+
+        if ($users_table->save($users))
+            echo "User is added.";
+    }
+
+    public function deleteuser($id = 0) {
+        $this->autoRender = false;
+
+        $users_table = TableRegistry::get('tbl_users');
+        $countrows = $users_table->find()->where(["id" => $id])->count();
+        if ($countrows > 0) {
+            $users = $users_table->get($id);
+            $users_table->delete($users);
+            echo "User deleted successfully.";
+            $this->setAction('index');
+        } else {
+            $this->json(1, "User not found with this id " . $id);
+        }
+    }
+
+    public function updateuser() {
+
+        /* not completed yet */
+
+        $this->autoRender = false;
+
+        $fname = isset($_REQUEST['fname']) ? $_REQUEST['fname'] : "";
+        $lname = isset($_REQUEST['lname']) ? $_REQUEST['lname'] : "";
+        $code = isset($_REQUEST['code']) ? $_REQUEST['code'] : "";
+
+        $users_table = TableRegistry::get('tbl_users');
+
+        $total_rows = $users_table->find('all', [
+                    'conditions' => ['verify_code' => $code]
+                ])->count();
+
+        if ($total_rows > 0) {
+
+            $users_table->updateAll(['fname' => $fname, 'lname' => $lname], ['verify_code' => $code]);
+
+            $this->json(1, "password changed");
+        } else {
+            $this->json(0, "failed to change password");
+        }
+    }
+==================================================
+Making a View File,
+    reference link: https://www.codexworld.com/cakephp-tutorial-part-3-working-with-elements-layout/
+
+function at Controller,
+
+It is in UserController
+  public function loadview() {
+        
+    }
+
+ public function initialize() {
+        parent::initialize();
+        // Set the layout
+        $this->viewBuilder()->layout('frontend');
+    }
+
+
+Folder is in Template/User/<function_name>.php => Create View File.
+
+Create Template File at: Template/Layout/template_name.php
+
+Loading Elements to template_name.php by creating Elements at below path,
+       Create Elements of Function Template Views at Template/Elements/,
+
+Anchor Link
+<?php
+        echo $this->Html->link("Go to Dashboard", array('controller' => 'dashboard', 'action' => 'locationwidgets'), array('escape' => false, 'target' => '_blank'));
+        ?>
